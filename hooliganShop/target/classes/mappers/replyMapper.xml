@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.dao.ReplyDAO">
+  	<select id="reList" resultType="ReplyVO">
+  		select * from tbl_reply
+  		where bno = #{bno}
+  		order by rebno desc
+  	</select>
+  	
+  	<insert id = "insertReply">
+  		insert into tbl_reply (bno, replyContent, user_Id)
+  		values(#{bno}, #{replyContent}, #{userId})
+  	</insert>
+  	
+  	<update id="updateReply">
+  		update tbl_reply set replyContent = #{replyContent},
+  		udateDate = now()
+  		where rebno = #{rebno}
+  	</update>
+  	
+  	<delete id = "reDeleteReply">
+  		delete from tbl_reply where rebno = #{rebno}
+  	</delete>
+  	
+  	<select id = "reListPage" resultType="ReplyVO">
+  		select 
+  			rebno,
+  			bno,
+  			replyContent,
+  			user_id as userId,
+  			regDate,
+  			udateDate
+  		from tbl_reply
+  		where bno = #{bno}
+  		order by rebno desc
+  		limit #{pCri.startPage}, #{pCri.numPerPage}
+  	</select>
+  	
+  	<select id="reCount" resultType="int">
+  		select count(bno) from tbl_reply where bno=#{bno}
+  	</select>
+  	
+  	<select id="getBoardNo" resultType="int">
+  		select 
+  		bno
+  		from tbl_reply
+  		where rebno = #{rebno}
+  	</select>
+  	
+  </mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.spring.dao.CartDAO">
+	<insert id="addCart">
+		insert into tbl_cart (user_id, product_no, cart_stock)
+			value (#{userId}, #{productNo}, #{cartStock})
+	</insert>
+	
+	<select id="cartList" resultType="com.spring.vo.CartListVO">
+		select
+		     c.cart_no as cartNo, 
+		     c.user_id as userId, 
+		     c.product_no as productNo,
+		     c.cart_stock as cartStock,
+		     c.addDate,
+		     g.product_name as productName,
+		     g.product_price as productPrice,
+		     g.product_thumbImg as productThumbImg 
+		     from tbl_cart c 
+		 	inner join tbl_product g 
+		 		on c.product_no = g.product_no   
+		     	where c.user_id = #{userId}
+		     	order by c.cart_no desc
+     
+	</select>
+	
+	<delete id="deleteCart">
+	 	delete from tbl_cart 
+ 			where cart_no = #{cartNo} and user_id = #{userId};
+	</delete>
+	
+	<insert id="orderInfo">
+		insert into tbl_order(order_no, user_id, order_amount)
+			value (#{orderNo},#{userId},#{orderAmount})
+	</insert>
+	
+	<insert id="orderInfoDetail">
+		insert into tbl_order_details(order_no, product_no, cart_stock)
+			select #{orderNo}, 
+			product_no as productNo, 
+			cart_stock as cartStock 
+			from tbl_cart
+	</insert>
+	
+	<select id="orderInfoMore" resultType="com.spring.vo.OrderVO">
+		select
+			o.order_no as orderNo,
+			o.user_id as userId,
+			o.order_amount as orderAmount,
+			o.orderDate,
+			o.delivery,
+			u.user_name as userName,
+			u.user_phone as userPhone,
+			u.user_address1 as userAdd1,
+			u.user_address2 as userAdd2,
+			u.user_address3 as userAdd3
+			
+			from tbl_order o
+			inner join tbl_user u
+				on o.user_id = u.user_id
+	</select>
+	
+	<!-- 카트 비우기 -->
+	<delete id="cartAllDelete">
+		delete from tbl_cart
+			where user_id=#{userId};
+	</delete>
+	
+	<!-- 특정 유저의 주문 목록 -->
+	<select id="orderList" resultType="com.spring.vo.OrderViewVO">
+		select
+			o.order_no as orderNo,
+			o.order_amount as orderAmount,
+			o.orderDate,
+			o.delivery,
+			u.user_name as userName,
+			u.user_address1 as userAdd1,
+			u.user_address2 as userAdd2,
+			u.user_address3 as userAdd3
+			
+			from tbl_order o
+			inner join tbl_user u
+				on o.user_id = u.user_id and o.user_id = #{userId}
+				order by orderDate desc		
+	</select>
+	
+	<!-- 특정 주문 목록 -->
+	<select id ="orderView" resultType="com.spring.vo.OrderListVO">
+	 select
+	     o.order_no as orderNo,
+	     o.user_id as userId, 
+	     o.order_amount as orderAmount,
+	     o.orderDate as orderDate,
+	     o.delivery,
+	     d.order_details_no as orderDetailsNo,
+	     d.product_no as productNo,
+	     d.cart_stock as cartStock,
+	     g.product_stock as productStock,
+	     g.product_name as productName,
+	     g.product_thumbImg as productThumbImg,
+	     g.product_price as productPrice,
+	     u.user_name as userName,
+	     u.user_address1 as userAdd1,
+	     u.user_address2 as userAdd2,
+	     u.user_address3 as userAdd3
+	 	 from tbl_order o
+	         inner join tbl_order_details d
+	             on o.order_no = d.order_no
+	         inner join tbl_product g
+	             on d.product_no = g.product_no
+	         inner join tbl_user u
+	         	on o.user_id = u.user_id
+     			where o.user_id = #{userId} and o.order_no = #{orderNo}		
+	</select>	
+			
+</mapper>

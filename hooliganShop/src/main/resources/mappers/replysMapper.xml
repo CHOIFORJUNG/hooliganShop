@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.spring.dao.ReplysDAO">
+  	<select id="replyList" resultType="ReplysVO">
+  		select * from tbl_shopreply
+  		where productNo = #{productNo}
+  		order by rebnum desc
+  	</select>
+  	
+  	<insert id = "insertReplys">
+  		insert into tbl_shopreply (product_no, reContent, user_Id)
+  		values(#{productNo}, #{reContent}, #{userId})
+  	</insert>
+  	
+  	<update id="updateReplys">
+  		update tbl_shopreply set reContent = #{reContent},
+  		udatedate = now()
+  		where rebnum = #{rebnum}
+  	</update>
+  	
+  	<delete id = "reDeleteReplys">
+  		delete from tbl_shopreply where rebnum = #{rebnum}
+  	</delete>
+  	
+  	<select id = "replyListPage" resultType="ReplysVO">
+  		select 
+  			rebnum,
+  			product_no as productNo,
+  			reContent,
+  			user_id as userId,
+  			regdate,
+  			udatedate
+  		from tbl_shopreply
+  		where product_no = #{productNo}
+  		order by rebnum desc
+  		limit #{pCri.startPage}, #{pCri.numPerPage}
+  	</select>
+  	
+  	<select id="reCounts" resultType="int">
+  		select count(product_no) from tbl_shopreply where product_no=#{productNo}
+  	</select>
+  	
+  </mapper>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.dao.BoardDAO">
+
+	<insert id="insert">
+		insert into tbl_board (bno, user_id, board_title, board_content, 
+		board_img, board_thumbImg)
+		values (#{bno}, #{userId}, #{title}, #{content}, #{boardImg}, #{boardThumbImg})
+	</insert>
+
+	<select id="read" resultType="BoardVO">
+		select
+			bno, 
+			user_id as userId, 
+			board_title as title, 
+			board_content as content,
+			hit, 
+			board_replycnt as replyCnt, 
+			board_img as boardImg, 
+			board_thumbImg as boardThumbImg, 
+			regDate, 
+			modDate
+		from
+		tbl_board
+		where bno=#{bno}
+	</select>
+
+	<update id="update">
+		update tbl_board set board_title=#{title},
+		board_img=#{boardImg},
+		board_thumbImg=#{boardThumbImg},
+		board_content=#{content}
+		where bno=#{bno}
+	</update>
+
+	<delete id="delete">
+		delete from tbl_board where bno=#{bno}
+	</delete>
+
+	<select id="list" resultType="com.spring.vo.BoardVO">
+	<![CDATA[
+		select
+			bno, 
+			user_id as userId, 
+			board_title as title, 
+			board_content as content,
+			hit, 
+			board_replycnt as replyCnt, 
+			board_img as boardImg, 
+			board_thumbImg as boardThumbImg, 
+			regDate, 
+			modDate
+		from
+			tbl_board
+		where bno > 0
+		order by bno desc, regdate desc
+	]]>
+	</select>
+	
+	<select id="listPage" resultType="BoardVO">
+	<![CDATA[
+		select
+			bno, 
+			user_id as userId, 
+			board_title as title, 
+			board_content as content,
+			hit, 
+			board_replycnt as replyCnt, 
+			board_img as boardImg, 
+			board_thumbImg as boardThumbImg, 
+			regDate, 
+			modDate
+		from
+			tbl_board
+		where bno > 0
+		order by bno desc, regDate desc
+		limit #{page}, 10
+	]]>
+	</select>
+
+	<select id="listCriteria" resultType="BoardVO">
+	<![CDATA[
+		select
+			bno, 
+			user_id as userId, 
+			board_title as title, 
+			board_content as content,
+			hit, 
+			board_replycnt as replyCnt, 
+			board_img as boardImg, 
+			board_thumbImg as boardThumbImg, 
+			regDate, 
+			modDate
+		from
+			tbl_board
+		where bno > 0
+		order by bno desc, regDate desc
+		limit #{startPage}, #{numPerPage}
+	]]>
+	
+	</select>
+	    <select id="countData" resultType="int">
+		<![CDATA[
+				select count(bno) from tbl_board
+				where bno >0
+		]]>
+    </select>
+       <!-- MyBatis에서 제공하는 <include>, <sql>  -->
+	<sql id = "findSQL">
+		<if test="findType != null">
+			<if test="findType == 'S'.toString()">
+				and board_title like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="findType =='C'.toString()">
+				and board_content like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="findType =='W'.toString()">
+				and user_id like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="findType =='SC'.toString()">
+				and (board_title like CONCAT('%', #{keyword}, '%') 
+				or board_content like CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="findType == 'CW'.toString()">
+				and (board_content like CONCAT('%', #{keyword}, '%') 
+				or user_id like CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="findType =='SCW'.toString()">
+				and(board_title like CONCAT('%', #{keyword}, '%')
+				or board_content like CONCAT('%', #{keyword}, '%')
+				or user_id like CONCAT('%', #{keyword}, '%'))
+			</if>		
+		</if>	
+	</sql>
+	
+	
+	<select id="listFind" resultType="BoardVO">
+	<![CDATA[
+		select  
+			bno, 
+			user_id as userId, 
+			board_title as title, 
+			board_content as content,
+			hit, 
+			board_replycnt as replyCnt, 
+			board_img as boardImg, 
+			board_thumbImg as boardThumbImg, 
+			regDate, 
+			modDate
+		from tbl_board
+		where bno > 0
+	]]>	
+		<include refid="findSQL"></include>
+	<![CDATA[	
+		order by bno desc
+		limit #{startPage}, #{numPerPage}
+	]]>
+	</select>
+	
+	
+	<select id="findCountData" resultType="int">
+	<![CDATA[
+		select count(bno)
+		from tbl_board
+		where bno > 0
+	]]>
+		<include refid="findSQL"></include>
+	</select>
+	
+	
+	<select id="listSearch" resultMap="ArticleResultMap">
+        <![CDATA[
+        SELECT
+        	bno,
+        	board_title as title,
+        	board_content as content,
+        	user_id as userId,
+        	regDate,
+        	hit,
+        	board_replycnt as replyCnt,
+        	modDate
+        FROM tbl_board
+        WHERE bno > 0
+        ]]>
+          <include refid="findSQL"/>
+        <![CDATA[
+        ORDER BY bno DESC, regDate DESC
+        LIMIT #{startPage}, #{numPerPage}
+        ]]>
+    </select>
+    
+    <update id="replyCnt">
+    	update tbl_board
+    	set board_replycnt = board_replycnt + #{amount}
+    	where bno = #{bno}
+    </update>
+	
+	
+	<resultMap id="ArticleResultMap" type="BoardVO">
+        <id property="bno" column="bno"/>
+        <result property="title" column="board_title" />
+        <result property="content" column="board_content" />
+        <result property="userId" column="user_id" />
+        <result property="regDate" column="regDate" />
+        <result property="hit" column="hit" />
+        <result property="replyCnt" column="board_replycnt" />
+        <result property="modDate" column="modDate" />
+    </resultMap>
+    
+    <update id="hitCnt">
+        UPDATE tbl_board
+        SET hit = hit + 1
+        WHERE bno = #{bno}
+    </update>	
+		
+</mapper>

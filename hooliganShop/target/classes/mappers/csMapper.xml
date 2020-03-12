@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.dao.CsDAO">
+	<!-- auto-increment나 now()가 적용된 컬럼은 생략가능 -->
+	<insert id="csinsert">
+		insert into tbl_cs (userId, csTitle, csContent,
+		hit, csReplycnt, csPw, csThumbImg)
+		values (#{userId}, #{csTitle}, #{csContent}, #{hit},
+		#{csReplycnt}, #{csPw}, #{csThumbImg})
+	</insert>
+
+	<select id="csread" resultType="CsVO">
+		select
+			csNo, 
+			userId,
+			csTitle,
+			csContent,
+			hit, 
+			csReplycnt,
+			csPw,
+			regDate, 
+			modDate,
+			csThumbImg
+		from
+		tbl_cs
+		where csNo=#{csNo}
+	</select>
+
+	<update id="csupdate">
+		update tbl_cs set csTitle=#{csTitle},
+		csContent=#{csContent}
+		where csNo=#{csNo}
+	</update>
+	
+	<delete id="csdelete">
+		delete from tbl_cs where csNo=#{csNo}
+	</delete>
+	
+	<select id="cslist" resultType="com.spring.vo.CsVO">
+	<![CDATA[
+		select
+			csNo, 
+			userId,
+			csTitle,
+			csContent,
+			hit, 
+			csReplycnt,
+			csPw,
+			regDate, 
+			modDate
+		from
+			tbl_cs
+		where csNo > 0
+		order by csNo desc, regDate desc
+	]]>
+	</select>
+	
+	<select id="cslistCriteria" resultType="CsVO">
+	<![CDATA[
+		select
+			csNo, 
+			userId,
+			csTitle,
+			csContent,
+			hit, 
+			csReplycnt,
+			csPw,
+			regDate, 
+			modDate
+		from
+			tbl_cs
+		where csNo > 0
+		order by csNo desc, regDate desc
+		limit #{startPage}, #{numPerPage}
+	]]>
+	</select>
+	
+    <select id="cscountData" resultType="int">
+	<![CDATA[
+			select count(csNo) from tbl_cs
+			where csNo >0
+	]]>
+	</select>
+	
+	<update id="updateReplyCnt">
+		update tbl_cs
+		set csReplycnt = csReplycnt + #{amount}
+		where csNo = #{csNo}
+	</update>
+	
+	<resultMap id="CsResultMap" type="CsVO">
+        <id property="csNo" column="csNo"/>
+        <result property="csTitle" column="csTitle" />
+        <result property="csContent" column="csContent" />
+        <result property="userId" column="userId" />
+        <result property="regDate" column="regDate" />
+        <result property="hit" column="hit" />
+        <result property="csReplycnt" column="csReplycnt" />
+        <result property="modDate" column="modDate" />
+    </resultMap>	
+    
+</mapper>

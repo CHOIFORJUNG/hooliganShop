@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<!-- mariadb와의 연결을 담당하는게 dataSource  (테스트: DataSource.java)  -->
+	
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="url" value="jdbc:log4jdbc:mariadb://amourjun-rds-mariadb.cgm9h1xhwwk1.us-east-2.rds.amazonaws.com:3306/hooligan_shop"/> 
+			
+		<!-- log4jdbc 사용위해, 기존에 사용하던 Driver와 Url을 아래처럼 변경-->
+<!-- 		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+		<property name="url" value="jdbc:log4jdbc:mariadb://localhost:3306/hooligan_shop"/> -->
+		
+		<!-- 로컬 환경 -->
+		<!-- <property name="username" value="root" />
+		<property name="password" value="0000" />	 -->
+		
+		<!-- 서버 (RDS2 인스턴스)환경 -->
+		<property name="username" value="choidongjun" /> 
+		<property name="password" value="qlxmfwm1" />	
+		
+	</bean>
+	
+	<!-- mybatis-config.xml설정파일 경로도 정확히 지정해야함. (테스트: MyBatisTest.java)-->
+    <bean id ="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+       <property name="dataSource" ref="dataSource"/>
+       <property name="configLocation" value="classpath:/mybatis-config.xml" />
+       <property name="mapperLocations" value="classpath:mappers/**/*.xml"/>   
+    </bean>
+    
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method = "clearCache">
+      <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+    
+    <context:component-scan base-package="com.spring.hooliganShop" />  
+    <context:component-scan base-package="com.spring.dao" />  
+    <context:component-scan base-package="com.spring.service" />
+    <context:component-scan base-package="com.spring.utils" />
+    
+    	<!-- 업로드 패스 설정 --> 
+	<bean class="java.lang.String" id="uploadPath">
+	<!--  <constructor-arg value="C:\workspace\SpringStart\hooliganShop\src\main\resources" /> -->
+		<constructor-arg value="C:\workspace\SpringStart\.metadata\.plugins\org.eclipse.wst.server.core\tmp2\wtpwebapps\hooliganShop\resources" />
+	</bean>
+	    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven/>
+</beans>

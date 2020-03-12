@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.spring.dao.CsReplyDAO">
+  
+  	<select id="csreplyList" resultType="CsReplyVO">
+  		select * from tbl_cs_reply
+  		where csNo = #{csNo}
+  		order by csReplyNo desc
+  	</select>
+  	
+  	<insert id="csinsertReply">
+  		insert into tbl_cs_reply (csNo, csContent, userId)
+  		values(#{csNo}, #{csContent}, #{userId}) 
+  	</insert>
+  
+  	<update id="csupdateReply">
+  		update tbl_cs_reply set csContent = #{csContent}, modDate = now()
+  		where csReplyNo = #{csReplyNo}
+  	</update>
+  	
+  	<delete id="csdeleteReply">
+  		delete from tbl_cs_reply where csReplyNo = #{csReplyNo} 
+  	</delete>
+  	
+  	<select id = "csreplyListPage" resultType="CsReplyVO">
+  		select
+  			csReplyNo,
+  			userId,
+  			csNo,
+  			csContent,
+  			regDate,
+  			modDate
+  		from tbl_cs_reply
+  		where csNo=#{csNo}
+  		order by csReplyNo desc
+  		limit #{pCri.startPage}, #{pCri.numPerPage}
+  	</select>
+  	
+  	<select id="csreCount" resultType="int">
+  		select count(csNo) from tbl_cs_reply where csNo=#{csNo}
+  	</select>
+  	
+  	<select id="getCsNo" resultType="int">
+  		select
+  			getCsNo
+  		from tbl_cs_reply
+  		where csReplyNo = #{csReplyNo}
+  	</select>
+  	
+    </mapper>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.dao.AdminDAO">
+
+	<!-- 상품카테고리 -->
+	<select id="category" resultType="com.spring.vo.CategoryVO">
+		SELECT 1 AS LEVEL, cateName, cateCode, cateCodeRef 
+		     FROM tbl_category WHERE cateCodeRef is NULL
+		     UNION ALL
+		SELECT 2 AS LEVEL, cateName, cateCode, cateCodeRef 
+		     FROM tbl_category WHERE cateCodeRef IS NOT null
+		     ORDER BY cateCode;
+	</select>
+	
+	<!-- 상품 리스트 -->
+	<select id="productlist" resultType="ProductVO">
+	 	select
+  			product_no as productNo, 
+  			product_name as productName,
+  			cateCode, 
+  			product_price as productPrice,
+  			product_details as productDetails,
+  			product_stock as productStock,
+  			product_img as productImg,
+  			regdate
+    	from tbl_product
+        order by product_name desc
+	</select>
+	
+	<!-- 상품 조회 -->
+<!-- 	<select id="productView" resultType="ProductVO">
+	 	select
+  			product_no as productNo, 
+  			product_name as productName,
+  			cateCode, 
+  			product_price as productPrice,
+  			product_details as productDetails,
+  			product_stock as productStock,
+  			product_img as productImg,
+  			regdate
+    	from tbl_product
+    	where product_no=#{productNo}
+	</select> -->
+	<select id="productView" resultType="ProductViewVO">
+		select 
+			p.product_no as productNo, 
+			p.product_name as productName,
+			p.cateCode, 
+			c.cateCodeRef, 
+			c.cateName,
+			product_price as productPrice, 
+			product_stock as productStock, 
+			product_details as productDetails, 
+			product_img as productImg, 
+			regdate
+		from tbl_product p 
+			inner join tbl_category c 
+			on p.cateCode = c.cateCode 
+			where p.product_no = #{productNo};
+	</select>
+	
+	<!-- 상품 수정 -->
+	<update id="productModify">
+	 update tbl_product 
+	 set product_name = #{productName}, 
+	 		cateCode = #{cateCode}, 
+	 		product_price = #{productPrice}, 
+	 		product_stock = #{productStock}, 
+	 		product_details = #{productDetails},
+	 		product_details = #{productDetails},
+	 		product_img = #{productImg},
+	 		product_thumbImg = #{productThumbImg}
+	 	where product_no = #{productNo}
+	</update>
+	
+		<!-- 상품 삭제 -->
+	<delete id="productDelete">
+	 delete from tbl_product
+	 where product_no = #{productNo}
+	</delete>
+	
+	<!-- 모든 주문목록 -->
+		<select id="adminOrderList" resultType="com.spring.vo.OrderViewVO">
+		select
+			o.order_no as orderNo,
+			o.user_id as userId,
+			o.order_amount as orderAmount,
+			o.orderDate,
+			o.delivery,
+			u.user_name as userName,
+			u.user_phone as userPhone,
+			u.user_address1 as userAdd1,
+			u.user_address2 as userAdd2,
+			u.user_address3 as userAdd3
+			
+			from tbl_order o
+			inner join tbl_user u
+				on o.user_id = u.user_id
+				order by orderDate desc
+	</select>
+	
+	<!-- 특정 주문 목록 -->
+	<select id ="adminOrderView" resultType="com.spring.vo.OrderListVO">
+	 select
+	     o.order_no as orderNo,
+	     o.user_id as userId, 
+	     o.order_amount as orderAmount,
+	     o.orderDate as orderDate,
+	     o.delivery,
+	     d.order_details_no as orderDetailsNo,
+	     d.product_no as productNo,
+	     d.cart_stock as cartStock,
+	     g.product_stock as productStock,
+	     g.product_name as productName,
+	     g.product_thumbImg as productThumbImg,
+	     g.product_price as productPrice,
+	     u.user_name as userName,
+	     u.user_address1 as userAdd1,
+	     u.user_address2 as userAdd2,
+	     u.user_address3 as userAdd3
+	 	 from tbl_order o
+	         inner join tbl_order_details d
+	             on o.order_no = d.order_no
+	         inner join tbl_product g
+	             on d.product_no = g.product_no
+	         inner join tbl_user u
+	         	on o.user_id = u.user_id
+     			where o.order_no = #{orderNo}		
+	</select>
+	
+		<!-- 배송 상태 -->
+	<update id="delivery">
+		 update tbl_order set delivery = #{delivery}
+		 where order_no = #{orderNo}
+	</update>
+	
+	<!-- 상품 선택 -->
+<select id=""></select>	
+		<!-- 상품 수량 조절 -->
+	<update id="changeStock">                 
+		update tbl_product set product_stock = product_stock - #{productStock} 
+		where product_no = #{productNo}
+	</update>
+	
+		<!-- 상품 수량 조절 보조 -->
+	<select id="changeStock_sub" resultType="com.spring.vo.OrderDetailVO">
+		select
+			order_no as orderNo,
+			product_no as productNo,
+			cart_stock as cartStock
+		from tbl_order_details
+			where order_no = #{orderNo}
+	</select>
+	
+	<!-- 상품 리스트 -->
+	<select id="userList" resultType="UserVO">
+	 	select
+  			user_id as userId,
+  			user_name as userName,
+  			user_email as userEmail,
+  			user_address1 as userAdd1,
+  			regDate
+    	from tbl_user
+        order by user_id desc
+	</select>	
+	</mapper>
